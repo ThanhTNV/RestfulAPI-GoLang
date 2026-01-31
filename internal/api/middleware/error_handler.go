@@ -14,7 +14,15 @@ func ErrorHandler() gin.HandlerFunc {
 		// Check if there are any errors attached to the context
 		if len(c.Errors) > 0 {
 			err := c.Errors.Last()
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			
+			// Use the status code if it was already set by the controller
+			// Otherwise default to 500 Internal Server Error
+			statusCode := c.Writer.Status()
+			if statusCode == http.StatusOK {
+				statusCode = http.StatusInternalServerError
+			}
+			
+			c.JSON(statusCode, gin.H{"error": err.Error()})
 		}
 	}
 }

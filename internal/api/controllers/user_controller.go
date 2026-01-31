@@ -88,7 +88,13 @@ func (ctrl *UserController) UpdateUser(c *gin.Context) {
 	}
 
 	// Fetch updated user to return
-	user, _ := ctrl.userService.GetUserByID(id)
+	user, err := ctrl.userService.GetUserByID(id)
+	if err != nil {
+		// This should not happen since we just updated successfully
+		// but handle it just in case
+		c.Error(err)
+		return
+	}
 	c.JSON(http.StatusOK, user)
 }
 
