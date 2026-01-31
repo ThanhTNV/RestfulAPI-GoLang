@@ -1,15 +1,37 @@
 # RestfulAPI-GoLang
 
-A RESTful API server built with Go, Gin framework, and PostgreSQL, running in Docker Compose.
+A RESTful API server built with Go, Gin framework, and PostgreSQL, following a clean 3-tier architecture with dependency injection, running in Docker Compose.
 
 ## Features
 
+- **3-Tier Architecture**: Presentation (API), Service (Business Logic), and Repository (Data Access) layers
+- **Dependency Injection**: Modular and testable design
+- **Router-Middleware-Controller Pattern**: Clean separation of concerns
 - RESTful API with CRUD operations
-- Gin web framework
-- PostgreSQL database
-- GORM ORM
+- Gin web framework with custom middleware
+- PostgreSQL database with GORM ORM
 - Docker Compose for easy deployment
 - Health check endpoint
+- Error handling middleware
+
+## Architecture
+
+This project follows a clean 3-tier architecture:
+
+### Presentation Layer (API Layer)
+- **Controllers**: Handle HTTP requests and responses
+- **Middleware**: Error handling, logging, and request validation
+- **Routes**: Define API endpoints
+
+### Service Layer
+- Contains business logic
+- Orchestrates between repositories
+- Independent of transport layer (HTTP, CLI, etc.)
+
+### Repository Layer
+- Handles data persistence
+- Maps database rows to Go structs
+- Abstracts database operations
 
 ## Prerequisites
 
@@ -97,7 +119,7 @@ export PORT=8080
 
 4. Run the application:
 ```bash
-go run main.go
+go run cmd/api/main.go
 ```
 
 ## Environment Variables
@@ -113,13 +135,46 @@ go run main.go
 
 ```
 .
-├── main.go              # Main application file
-├── Dockerfile           # Docker configuration
-├── docker-compose.yml   # Docker Compose configuration
-├── go.mod              # Go module file
-├── go.sum              # Go dependencies
-└── README.md           # This file
+├── cmd/
+│   └── api/
+│       └── main.go              # Application entry point with DI setup
+├── internal/
+│   ├── api/
+│   │   ├── controllers/         # HTTP request handlers
+│   │   ├── middleware/          # Error handling, logging, etc.
+│   │   └── routes/              # Route definitions
+│   ├── service/                 # Business logic layer
+│   ├── repository/              # Data access layer
+│   └── models/                  # Domain entities
+├── pkg/
+│   ├── config/                  # Configuration management
+│   └── database/                # Database connection utilities
+├── Dockerfile                   # Docker configuration
+├── docker-compose.yml           # Docker Compose configuration
+├── go.mod                       # Go module file
+├── go.sum                       # Go dependencies
+└── README.md                    # This file
 ```
+
+## Design Patterns
+
+### Dependency Injection
+The application uses constructor-based dependency injection. Dependencies flow from `main.go`:
+```
+main.go → Repository → Service → Controller → Routes
+```
+
+### Middleware Pattern
+Custom middleware intercepts requests for:
+- Error handling: Centralized error response formatting
+- Recovery: Panic recovery with graceful error messages
+- Logging: Request/response logging (can be extended)
+
+### Repository Pattern
+Abstract database operations behind interfaces, making it easy to:
+- Swap implementations
+- Mock for testing
+- Change databases without affecting business logic
 
 ## License
 
