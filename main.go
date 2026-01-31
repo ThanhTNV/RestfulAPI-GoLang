@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
@@ -83,6 +84,13 @@ func getUsers(c *gin.Context) {
 func getUser(c *gin.Context) {
 	var user User
 	id := c.Param("id")
+	
+	// Validate ID is a valid integer
+	if _, err := strconv.ParseUint(id, 10, 32); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	
 	result := db.First(&user, id)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
@@ -115,6 +123,12 @@ func createUser(c *gin.Context) {
 func updateUser(c *gin.Context) {
 	var user User
 	id := c.Param("id")
+	
+	// Validate ID is a valid integer
+	if _, err := strconv.ParseUint(id, 10, 32); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid user ID"})
+		return
+	}
 
 	// Check if user exists
 	result := db.First(&user, id)
@@ -148,6 +162,13 @@ func updateUser(c *gin.Context) {
 // DELETE /api/v1/users/:id - Delete a user
 func deleteUser(c *gin.Context) {
 	id := c.Param("id")
+	
+	// Validate ID is a valid integer
+	if _, err := strconv.ParseUint(id, 10, 32); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	
 	result := db.Delete(&User{}, id)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": result.Error.Error()})
